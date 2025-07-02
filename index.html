@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23030213' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='18' height='10' x='3' y='11' rx='2'/><circle cx='12' cy='5' r='2'/><path d='m12 7 0 4'/><line x1='8' x2='8' y1='16' y2='16'/><line x1='16' x2='16' y1='16' y2='16'/></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agentica.ai - AI Voice Agents Marketplace</title>
+    <meta name="description" content="Discover and deploy AI voice agents in seconds with Agentica.ai. Choose from hundreds of pre-built intelligent agents or create your own custom AI assistant." />
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Load Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <style>
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Loading spinner */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #030213;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Fallback loading state -->
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+        <div class="loading"></div>
+        <p style="margin-top: 16px; color: #717182;">Loading Agentica.ai...</p>
+      </div>
+    </div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>
