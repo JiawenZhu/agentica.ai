@@ -20,6 +20,7 @@ import {
 import { supabaseService } from '../services/supabaseService';
 import { geminiService, DocumentAnalysis } from '../services/geminiService';
 import { fileParserService, ParsedFileResult } from '../services/fileParserService';
+import pLimit from 'p-limit';
 
 interface KnowledgeBaseUploadProps {
   agentId: string;
@@ -122,9 +123,17 @@ export function KnowledgeBaseUpload({
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
 
-    // Process each file
-    for (let i = 0; i < newFiles.length; i++) {
-      await processFile(newFiles[i], uploadedFiles.length + i);
+    // Process files with concurrency control to prevent Gemini API overload
+    const limit = pLimit(1); // Limit to 1 concurrent Gemini API call to avoid 503 errors
+    const processPromises = newFiles.map((uploadedFile, index) => 
+      limit(() => processFile(uploadedFile, uploadedFiles.length + index))
+    );
+
+    try {
+      await Promise.all(processPromises);
+    } catch (error) {
+      console.error('Error processing files:', error);
+      toast.error('Some files failed to process. Please try again later.');
     }
   };
 
@@ -274,6 +283,19 @@ export function KnowledgeBaseUpload({
     } catch (error) {
       console.error('Error processing file:', error);
       
+      // Enhanced error logging for debugging
+      if (error && typeof error === 'object' && 'message' in error) {
+        console.error('Error details:', {
+          message: error.message,
+          code: (error as any).code,
+          details: (error as any).details,
+          hint: (error as any).hint,
+          file: uploadedFile.file.name,
+          contentLength: content?.length || 0,
+          analysisKeys: analysis ? Object.keys(analysis) : []
+        });
+      }
+      
       updateStatus('error', 0);
       setUploadedFiles(prev => 
         prev.map((f, i) => 
@@ -285,7 +307,19 @@ export function KnowledgeBaseUpload({
         )
       );
 
-      toast.error(`Failed to process ${uploadedFile.file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Provide more specific error messages
+      let errorMessage = 'Processing failed';
+      if (error instanceof Error) {
+        if (error.message.includes('503') || error.message.includes('overloaded')) {
+          errorMessage = 'AI service is temporarily overloaded. Please try again later.';
+        } else if (error.message.includes('400') || error.message.includes('constraint')) {
+          errorMessage = 'Data validation error. Please check the file content and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      toast.error(`Failed to process ${uploadedFile.file.name}: ${errorMessage}`);
     }
   };
 

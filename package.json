@@ -51,6 +51,7 @@
     "jspdf": "^3.0.1",
     "lucide-react": "^0.294.0",
     "mammoth": "^1.9.1",
+    "p-limit": "^6.2.0",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^5.3.93",
     "re-resizable": "^6.9.11",

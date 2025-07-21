@@ -233,6 +233,75 @@ export class SupabaseService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Ensure content is not null or empty
+    if (!content || content.trim().length === 0) {
+      throw new Error('Document content cannot be empty');
+    }
+
+    // Prepare data with proper null handling
+    const insertData = {
+      user_id: user.id,
+      agent_id: agentId,
+      filename: `${Date.now()}_${file.name}`,
+      original_filename: file.name,
+      file_type: file.type || 'text/plain',
+      file_size: file.size,
+      content: content.trim(),
+      analysis: analysis || {},
+      summary: analysis?.summary || null,
+      key_topics: analysis?.keyTopics || [],
+      entities: analysis?.entities || [],
+      categories: analysis?.categories || [],
+      sentiment: analysis?.sentiment || 'neutral',
+      language: analysis?.language || 'en',
+      reading_level: analysis?.readingLevel || 'intermediate',
+      key_phrases: analysis?.keyPhrases || [],
+      answerable_questions: analysis?.questions || [],
+      processing_status: 'completed',
+      metadata: metadata || {},
+    };
+
+    console.log('Uploading document with data:', {
+      filename: insertData.filename,
+      contentLength: insertData.content.length,
+      analysisKeys: Object.keys(insertData.analysis),
+      hasSummary: !!insertData.summary,
+      keyTopicsCount: insertData.key_topics.length
+    });
+
+    const { data, error } = await supabase
+      .from('knowledge_base_documents')
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase upload error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+    }
+
+    return { data, error };
+  }
+
+  // Basic upload function without analysis data (fallback)
+  async uploadDocumentBasic(
+    agentId: string,
+    file: File,
+    content: string,
+    metadata?: Record<string, any>
+  ) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Ensure content is not null or empty
+    if (!content || content.trim().length === 0) {
+      throw new Error('Document content cannot be empty');
+    }
+
     const { data, error } = await supabase
       .from('knowledge_base_documents')
       .insert({
@@ -242,17 +311,17 @@ export class SupabaseService {
         original_filename: file.name,
         file_type: file.type || 'text/plain',
         file_size: file.size,
-        content,
-        analysis: analysis || {},
-        summary: analysis?.summary,
-        key_topics: analysis?.keyTopics,
-        entities: analysis?.entities,
-        categories: analysis?.categories,
-        sentiment: analysis?.sentiment,
-        language: analysis?.language,
-        reading_level: analysis?.readingLevel,
-        key_phrases: analysis?.keyPhrases,
-        answerable_questions: analysis?.questions,
+        content: content.trim(),
+        analysis: {},
+        summary: null,
+        key_topics: [],
+        entities: [],
+        categories: [],
+        sentiment: 'neutral',
+        language: 'en',
+        reading_level: 'intermediate',
+        key_phrases: [],
+        answerable_questions: [],
         processing_status: 'completed',
         metadata: metadata || {},
       })
