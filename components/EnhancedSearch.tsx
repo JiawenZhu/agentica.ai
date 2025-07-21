@@ -652,7 +652,7 @@ export function CompactSearch({ onSearch, className }: { onSearch?: (query: stri
                 >
                   <div className="text-gray-600 dark:text-gray-400">{suggestion.icon}</div>
                   <span className="flex-1 truncate text-gray-900 dark:text-white font-medium">{suggestion.text}</span>
-                  <Badge variant="outline" className={cn('text-xs font-bold', getTypeColor(suggestion.type))}>
+                  <Badge variant="outline" className={cn('text-xs font-bold')}>
                     {suggestion.type}
                   </Badge>
                 </button>

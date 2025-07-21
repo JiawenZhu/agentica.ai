@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -12,6 +12,8 @@ import { Textarea } from '../ui/textarea';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
 import { toast } from 'sonner';
+import { KnowledgeBaseUpload } from '../KnowledgeBaseUpload';
+import { KnowledgeBaseManager } from '../KnowledgeBaseManager';
 import { RetellVoiceCall } from '../RetellVoiceCall';
 import { 
   Mic, 
@@ -32,9 +34,84 @@ import {
   Phone
 } from 'lucide-react';
 
-const agentData = {
-  id: 1,
-  name: "Sarah - Real Estate Assistant",
+// Real agents data matching the marketplace
+const agentsData = [
+  {
+    id: "agent_76ed44202b54308594db74ba81",
+    name: "Bob - Customer Support Assistant",
+    description: "Professional customer support agent with natural conversation flow and problem-solving capabilities",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    tags: ["Customer Support", "Retell.ai", "GPT-4", "Problem Solving"],
+    rating: 4.8,
+    users: 1240,
+    price: "Free",
+    industry: "Customer Support",
+    voiceProvider: "Retell.ai",
+    category: "Customer Support",
+    voice_id: "11labs-Brian"
+  },
+  {
+    id: "agent_19b87dc8b8854e8fd507cd27d7",
+    name: "Lisa - Sales Assistant",
+    description: "Engaging sales assistant that helps qualify leads and schedule appointments with natural conversation",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e88362?w=150&h=150&fit=crop&crop=face",
+    tags: ["Sales", "Retell.ai", "Lead Qualification", "Scheduling"],
+    rating: 4.9,
+    users: 890,
+    price: "Free",
+    industry: "Sales",
+    voiceProvider: "Retell.ai",
+    category: "Sales Assistant",
+    voice_id: "11labs-Chloe"
+  },
+  {
+    id: "agent_10d32f961f65743f5d80af6ae2",
+    name: "Software Engineer Interviewer",
+    description: "Technical interviewer agent specialized in software engineering interviews with conversation flow",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    tags: ["HR", "Technical Interview", "Software Engineering", "Screening"],
+    rating: 4.7,
+    users: 650,
+    price: "Free",
+    industry: "Human Resources",
+    voiceProvider: "Retell.ai",
+    category: "HR",
+    voice_id: "11labs-Andrew"
+  },
+  {
+    id: "agent_5192fbebe055558b754f4ff116",
+    name: "Interview Agent - Multilingual",
+    description: "Multilingual interview agent supporting German and other languages for international hiring",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+    tags: ["HR", "Multilingual", "Interview", "German"],
+    rating: 4.6,
+    users: 320,
+    price: "Free",
+    industry: "Human Resources",
+    voiceProvider: "Retell.ai",
+    category: "HR",
+    voice_id: "11labs-Kate"
+  },
+  {
+    id: "agent_12aeaeaf91ed0d746b4d83e55d",
+    name: "Conversation Flow Agent",
+    description: "Advanced conversation flow agent with structured dialogue patterns for complex interactions",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    tags: ["Conversation Flow", "Advanced", "Structured", "Complex"],
+    rating: 4.8,
+    users: 750,
+    price: "Free",
+    industry: "General",
+    voiceProvider: "Retell.ai",
+    category: "Advanced",
+    voice_id: "11labs-Cimo"
+  }
+];
+
+// Default agent data for fallback
+const defaultAgentData = {
+  id: "agent_76ed44202b54308594db74ba81",
+  name: "Bob - Customer Support Assistant",
   description: "Helps visitors learn about properties and schedule viewings with natural conversation flow. Perfect for real estate websites looking to engage visitors 24/7.",
   avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e88362?w=150&h=150&fit=crop&crop=face",
   tags: ["Real Estate", "Retell.ai", "GPT-4", "Scheduling"],
@@ -113,24 +190,159 @@ const embedOptions = [
 
 export function AgentDetailPage() {
   const { id: agentIdFromUrl } = useParams<{ id: string }>();
+  
+  // Get agent data based on URL parameter
+  const agentData = agentsData.find(agent => agent.id === agentIdFromUrl) || defaultAgentData;
+  
   const [selectedVoice, setSelectedVoice] = useState(agentData.voiceProvider);
   const [selectedEmbed, setSelectedEmbed] = useState("inline");
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [useGPT4, setUseGPT4] = useState(true);
   const [enableMemory, setEnableMemory] = useState(true);
+  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [conversation, setConversation] = useState([
-    { role: "agent", text: "Hi! I'm Sarah, your real estate assistant. How can I help you today?" },
-    { role: "user", text: "I'm looking for a 3-bedroom house in downtown." },
-    { role: "agent", text: "Great! I can help you find 3-bedroom homes in the downtown area. What's your budget range, and are there any specific features you're looking for?" }
+    { role: "agent", text: `Hi! I'm ${agentData.name.split(' - ')[0]}, your AI assistant. How can I help you today?` },
+    { role: "user", text: "I'd like to know more about your capabilities." },
+    { role: "agent", text: `I'm designed to help with ${(agentData as any).category?.toLowerCase() || 'general'} tasks. I can assist you with various inquiries and provide helpful information. What would you like to know?` }
   ]);
 
-  // Use agent ID from URL params or fall back to new properly configured agent
-  const actualAgentId = agentIdFromUrl || 'agent_c4a397958805096bf70db2a610';
+  // Use the actual agent ID from the data
+  const actualAgentId = agentData.id;
+
+  // Load speech synthesis voices
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      // Load voices
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+      };
+      
+      // Voices might not be loaded immediately
+      if (window.speechSynthesis.getVoices().length > 0) {
+        loadVoices();
+      } else {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+    }
+
+    // Cleanup: stop any ongoing speech when component unmounts
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast.success('Code copied to clipboard!');
+  };
+
+  const handlePlayResponse = async () => {
+    if (isPlaying) {
+      // Stop current playback
+      if (audioRef) {
+        audioRef.pause();
+        audioRef.currentTime = 0;
+      }
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      // Get the last agent response from conversation
+      const lastAgentResponse = conversation
+        .filter(msg => msg.role === 'agent')
+        .pop();
+
+      if (!lastAgentResponse) {
+        toast.error('No agent response to play');
+        return;
+      }
+
+      setIsPlaying(true);
+      
+      // Use Web Speech API for TTS
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(lastAgentResponse.text);
+        
+        // Configure voice based on agent's voice_id
+        const voices = window.speechSynthesis.getVoices();
+        let selectedVoice = null;
+        
+        // Try to match the agent's voice characteristics
+        if ((agentData as any).voice_id?.includes('Chloe') || (agentData as any).voice_id?.includes('Kate')) {
+          selectedVoice = voices.find(voice => 
+            voice.name.toLowerCase().includes('female') || 
+            voice.name.toLowerCase().includes('samantha') ||
+            voice.name.toLowerCase().includes('karen')
+          );
+        } else if ((agentData as any).voice_id?.includes('Brian') || (agentData as any).voice_id?.includes('Andrew')) {
+          selectedVoice = voices.find(voice => 
+            voice.name.toLowerCase().includes('male') || 
+            voice.name.toLowerCase().includes('daniel') ||
+            voice.name.toLowerCase().includes('alex')
+          );
+        }
+        
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+        
+        // Configure speech parameters
+        utterance.rate = 0.9; // Slightly slower for clarity
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        // Handle speech events
+        utterance.onstart = () => {
+          toast.success(`Playing ${agentData.name.split(' - ')[0]}'s response`);
+        };
+        
+        utterance.onend = () => {
+          setIsPlaying(false);
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          setIsPlaying(false);
+          toast.error('Failed to play response');
+        };
+        
+        // Start speaking
+        window.speechSynthesis.speak(utterance);
+        
+      } else {
+        // Fallback: Create a simple audio notification
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 1);
+        
+        setTimeout(() => setIsPlaying(false), 1000);
+        toast.info('Text-to-speech not supported. Check console for response text.');
+        console.log('Agent Response:', lastAgentResponse.text);
+      }
+      
+    } catch (error) {
+      console.error('Error playing response:', error);
+      setIsPlaying(false);
+      toast.error('Failed to play response');
+    }
   };
 
   const selectedEmbedOption = embedOptions.find(option => option.id === selectedEmbed);
@@ -222,7 +434,8 @@ export function AgentDetailPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={handlePlayResponse}
+                  disabled={conversation.filter(msg => msg.role === 'agent').length === 0}
                 >
                   {isPlaying ? <Pause className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2" />}
                   {isPlaying ? 'Pause' : 'Play Response'}
@@ -263,19 +476,27 @@ export function AgentDetailPage() {
                 </Select>
               </div>
 
-              {/* Knowledge Upload */}
-              <div className="space-y-2">
-                <Label>Upload Knowledge Base</Label>
-                <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drag & drop PDFs, text files, or paste URLs
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Choose Files
-                  </Button>
-                </div>
-              </div>
+              {/* Knowledge Base Management */}
+              <Tabs defaultValue="upload" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload">Upload Documents</TabsTrigger>
+                  <TabsTrigger value="manage">Manage Knowledge Base</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="upload">
+                  <KnowledgeBaseUpload 
+                    agentId={actualAgentId}
+                    onUploadComplete={(document) => {
+                      console.log('Document uploaded:', document);
+                      toast.success('Knowledge base updated successfully!');
+                    }}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="manage">
+                  <KnowledgeBaseManager agentId={actualAgentId} />
+                </TabsContent>
+              </Tabs>
 
               {/* Agent Settings */}
               <div className="space-y-4">

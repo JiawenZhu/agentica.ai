@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { AppProvider } from "./contexts/AppContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Header } from "./components/Header";
 import { DashboardSkeleton } from "./components/LoadingStates";
 
@@ -34,6 +36,21 @@ const DashboardPage = lazy(() =>
 const CreateAgentPage = lazy(() =>
   import("./components/pages/CreateAgentPage").then(
     (module) => ({ default: module.CreateAgentPage }),
+  ),
+);
+const AuthPage = lazy(() =>
+  import("./components/pages/AuthPage").then(
+    (module) => ({ default: module.AuthPage }),
+  ),
+);
+const SettingsPage = lazy(() =>
+  import("./components/pages/SettingsPage").then(
+    (module) => ({ default: module.SettingsPage }),
+  ),
+);
+const ResetPasswordPage = lazy(() =>
+  import("./components/pages/ResetPasswordPage").then(
+    (module) => ({ default: module.ResetPasswordPage }),
   ),
 );
 
@@ -148,35 +165,61 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AppProvider>
+      <AuthProvider>
+        <AppProvider>
         <Router>
           <div className="min-h-screen bg-background">
             <Header />
             <main className="pb-8">
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  {/* Public Routes */}
                   <Route path="/" element={<LandingPage />} />
-                  <Route
-                    path="/marketplace"
-                    element={<MarketplacePage />}
+                  <Route path="/marketplace" element={<MarketplacePage />} />
+                  <Route path="/agent/:id" element={<AgentDetailPage />} />
+                  
+                  {/* Auth Routes */}
+                  <Route 
+                    path="/auth" 
+                    element={
+                      <ProtectedRoute requireAuth={false}>
+                        <AuthPage />
+                      </ProtectedRoute>
+                    } 
                   />
-                  <Route
-                    path="/agent/:id"
-                    element={<AgentDetailPage />}
+                  <Route 
+                    path="/auth/reset-password" 
+                    element={<ResetPasswordPage />} 
                   />
+                  
+                  {/* Protected Routes */}
                   <Route
                     path="/dashboard"
-                    element={<DashboardPage />}
+                    element={
+                      <ProtectedRoute>
+                        <DashboardPage />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/create"
-                    element={<CreateAgentPage />}
+                    element={
+                      <ProtectedRoute>
+                        <CreateAgentPage />
+                      </ProtectedRoute>
+                    }
                   />
-                  {/* Catch-all route for unmatched URLs */}
                   <Route
-                    path="*"
-                    element={<Navigate to="/" replace />}
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    }
                   />
+                  
+                  {/* Catch-all route for unmatched URLs */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>
             </main>
@@ -193,6 +236,7 @@ export default function App() {
           </div>
         </Router>
       </AppProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

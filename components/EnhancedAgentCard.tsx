@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 interface Agent {
-  id: number;
+  id: string | number;
   name: string;
   description: string;
   avatar: string;

@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer, ReactNode } from 'react';
 
 // Types
 interface Agent {
-  id: number;
+  id: string | number;
   name: string;
   description: string;
   avatar: string;
@@ -28,7 +28,7 @@ interface User {
 interface AppState {
   user: User | null;
   isAuthenticated: boolean;
-  favoriteAgents: number[];
+  favoriteAgents: (string | number)[];
   cart: Agent[];
   searchQuery: string;
   recentSearches: string[];
@@ -44,10 +44,10 @@ interface AppState {
 type AppAction =
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_AUTHENTICATED'; payload: boolean }
-  | { type: 'ADD_FAVORITE'; payload: number }
-  | { type: 'REMOVE_FAVORITE'; payload: number }
+  | { type: 'ADD_FAVORITE'; payload: string | number }
+  | { type: 'REMOVE_FAVORITE'; payload: string | number }
   | { type: 'ADD_TO_CART'; payload: Agent }
-  | { type: 'REMOVE_FROM_CART'; payload: number }
+  | { type: 'REMOVE_FROM_CART'; payload: string | number }
   | { type: 'CLEAR_CART' }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'ADD_RECENT_SEARCH'; payload: string }
@@ -145,9 +145,9 @@ const AppContext = createContext<{
   actions: {
     login: (user: User) => void;
     logout: () => void;
-    toggleFavorite: (agentId: number) => void;
+    toggleFavorite: (agentId: string | number) => void;
     addToCart: (agent: Agent) => void;
-    removeFromCart: (agentId: number) => void;
+    removeFromCart: (agentId: string | number) => void;
     setSearch: (query: string) => void;
     addRecentSearch: (query: string) => void;
     clearRecentSearches: () => void;
@@ -173,7 +173,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'CLEAR_CART' });
     },
     
-    toggleFavorite: (agentId: number) => {
+    toggleFavorite: (agentId: string | number) => {
       if (state.favoriteAgents.includes(agentId)) {
         dispatch({ type: 'REMOVE_FAVORITE', payload: agentId });
       } else {
@@ -187,7 +187,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     },
     
-    removeFromCart: (agentId: number) => {
+    removeFromCart: (agentId: string | number) => {
       dispatch({ type: 'REMOVE_FROM_CART', payload: agentId });
     },
     

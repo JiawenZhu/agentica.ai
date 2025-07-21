@@ -3,14 +3,18 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Menu, ChevronDown, Sparkles, Bot, Mic, Users } from 'lucide-react';
+import { Menu, ChevronDown, Sparkles, Bot, Mic, Users, User, LogOut, Settings } from 'lucide-react';
 import { Logo, LogoWithBeta } from './Logo';
 import { CompactSearch } from './EnhancedSearch';
+import { useAuth } from '../contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { toast } from 'sonner';
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -151,21 +155,64 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Desktop Auth Buttons */}
+          {/* Desktop Auth */}
           <div className="hidden sm:flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-600/10 transition-all duration-200"
-            >
-              Sign In
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 hover:from-primary/90 hover:via-blue-600/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-200 animate-glow"
-            >
-              Get Started
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-600/10">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback>
+                        {user.email?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:block text-sm">
+                      {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <User className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={async () => {
+                      await signOut();
+                      toast.success('Signed out successfully');
+                      navigate('/');
+                    }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-600/10 transition-all duration-200"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate('/auth')}
+                  className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 hover:from-primary/90 hover:via-blue-600/90 hover:to-purple-600/90 shadow-lg hover:shadow-xl transition-all duration-200 animate-glow"
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
           
           {/* Mobile Menu */}
@@ -198,21 +245,85 @@ export function Header() {
                   <NavLinks mobile onClose={() => setIsOpen(false)} />
                 </div>
                 
-                {/* Mobile Auth Buttons */}
+                {/* Mobile Auth */}
                 <div className="pt-4 border-t space-y-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-600/10" 
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Sign In
-                  </Button>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-primary via-blue-600 to-purple-600 hover:from-primary/90 hover:via-blue-600/90 hover:to-purple-600/90 shadow-lg" 
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Get Started
-                  </Button>
+                  {user ? (
+                    <>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarFallback>
+                            {user.email?.charAt(0).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/dashboard');
+                        }}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/settings');
+                        }}
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" 
+                        onClick={async () => {
+                          setIsOpen(false);
+                          await signOut();
+                          toast.success('Signed out successfully');
+                          navigate('/');
+                        }}
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start hover:bg-gradient-to-r hover:from-primary/10 hover:to-purple-600/10" 
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/auth');
+                        }}
+                      >
+                        Sign In
+                      </Button>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-primary via-blue-600 to-purple-600 hover:from-primary/90 hover:via-blue-600/90 hover:to-purple-600/90 shadow-lg" 
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate('/auth');
+                        }}
+                      >
+                        Get Started
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>

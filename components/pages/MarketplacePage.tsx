@@ -15,114 +15,109 @@ import { Search, Play, Star, Users, Filter, Grid, List, Heart, Share2, TrendingU
 import { useApp } from '../../contexts/AppContext';
 import { toast } from 'sonner';
 
+// Real agents from your Retell account with enhanced marketplace data
 const agents = [
   {
-    id: 1,
-    name: "Sarah - Real Estate Assistant",
-    description: "Helps visitors learn about properties and schedule viewings with natural conversation flow",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e88362?w=150&h=150&fit=crop&crop=face",
-    tags: ["Real Estate", "Retell.ai", "GPT-4", "Scheduling"],
+    id: "agent_76ed44202b54308594db74ba81", // Bob - Latest
+    name: "Bob - Customer Support Assistant",
+    description: "Professional customer support agent with natural conversation flow and problem-solving capabilities",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    tags: ["Customer Support", "Retell.ai", "GPT-4", "Problem Solving"],
     rating: 4.8,
     users: 1240,
     price: "Free",
-    industry: "Real Estate",
+    industry: "Customer Support",
     voiceProvider: "Retell.ai",
-    category: "Real Estate"
+    category: "Customer Support",
+    voice_id: "11labs-Brian"
   },
   {
-    id: 2,
-    name: "Alex - Customer Support Pro",
-    description: "Handles common support questions with knowledge base integration and escalation",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    tags: ["Support", "Vogent.ai", "Claude", "Knowledge Base"],
+    id: "agent_19b87dc8b8854e8fd507cd27d7", // Lisa - Latest
+    name: "Lisa - Sales Assistant",
+    description: "Engaging sales assistant that helps qualify leads and schedule appointments with natural conversation",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e88362?w=150&h=150&fit=crop&crop=face",
+    tags: ["Sales", "Retell.ai", "Lead Qualification", "Scheduling"],
     rating: 4.9,
     users: 890,
-    price: "$29/month",
-    industry: "Customer Support",
-    voiceProvider: "Vogent.ai",
-    category: "Customer Support"
+    price: "Free",
+    industry: "Sales",
+    voiceProvider: "Retell.ai",
+    category: "Sales Assistant",
+    voice_id: "11labs-Chloe"
   },
   {
-    id: 3,
-    name: "Maya - Product Demo Guide",
-    description: "Interactive product demos and feature explanations with screen sharing capabilities",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    tags: ["Sales", "Onboarding", "GPT-4", "Demo"],
+    id: "agent_10d32f961f65743f5d80af6ae2", // Software Engineer Interviewer
+    name: "Software Engineer Interviewer",
+    description: "Technical interviewer agent specialized in software engineering interviews with conversation flow",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    tags: ["HR", "Technical Interview", "Software Engineering", "Screening"],
     rating: 4.7,
     users: 650,
-    price: "$49/month",
-    industry: "Sales",
+    price: "Free",
+    industry: "Human Resources",
     voiceProvider: "Retell.ai",
-    category: "Sales Assistant"
+    category: "HR",
+    voice_id: "11labs-Andrew"
   },
   {
-    id: 4,
-    name: "David - Finance Advisor",
-    description: "Financial planning conversations and budget guidance with calculation tools",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    tags: ["Finance", "Retell.ai", "Expert", "Calculator"],
-    rating: 4.8,
-    users: 420,
-    price: "$79/month",
-    industry: "Finance",
-    voiceProvider: "Retell.ai",
-    category: "Finance"
-  },
-  {
-    id: 5,
-    name: "Emma - HR Recruiter",
-    description: "Initial candidate screening and interview scheduling with evaluation criteria",
+    id: "agent_5192fbebe055558b754f4ff116", // Interview agent (German)
+    name: "Interview Agent - Multilingual",
+    description: "Multilingual interview agent supporting German and other languages for international hiring",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-    tags: ["HR", "Vogent.ai", "Screening", "Scheduling"],
+    tags: ["HR", "Multilingual", "Interview", "German"],
     rating: 4.6,
     users: 320,
-    price: "$39/month",
+    price: "Free",
     industry: "Human Resources",
-    voiceProvider: "Vogent.ai",
-    category: "HR"
+    voiceProvider: "Retell.ai",
+    category: "HR",
+    voice_id: "11labs-Kate"
   },
   {
-    id: 6,
-    name: "Carlos - Language Tutor",
-    description: "Interactive language learning with pronunciation feedback and conversation practice",
+    id: "agent_12aeaeaf91ed0d746b4d83e55d", // Conversation Flow Agent
+    name: "Conversation Flow Agent",
+    description: "Advanced conversation flow agent with structured dialogue patterns for complex interactions",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    tags: ["Education", "Language", "GPT-4", "Practice"],
-    rating: 4.9,
+    tags: ["Conversation Flow", "Advanced", "Structured", "Complex"],
+    rating: 4.8,
     users: 750,
     price: "Free",
-    industry: "Education",
+    industry: "General",
     voiceProvider: "Retell.ai",
-    category: "Education"
+    category: "Advanced",
+    voice_id: "11labs-Cimo"
   },
   {
-    id: 7,
-    name: "Lisa - Lead Generation Expert",
-    description: "Qualifies leads automatically and schedules follow-up calls with sales team",
-    avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
-    tags: ["Lead Gen", "Retell.ai", "Qualification", "CRM"],
-    rating: 4.7,
+    id: "agent_54ac582260271a682e942a2dbc", // Bob - Alternative
+    name: "Bob - General Assistant",
+    description: "Versatile general-purpose assistant for various business needs and customer interactions",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    tags: ["General", "Versatile", "Business", "Assistant"],
+    rating: 4.5,
+    users: 420,
+    price: "Free",
+    industry: "General",
+    voiceProvider: "Retell.ai",
+    category: "General Assistant",
+    voice_id: "11labs-Brian"
+  },
+  {
+    id: "agent_30ea5584adfc13ddc9c6e209cf", // Lisa - Alternative
+    name: "Lisa - Business Assistant",
+    description: "Professional business assistant for handling inquiries and providing information",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e88362?w=150&h=150&fit=crop&crop=face",
+    tags: ["Business", "Professional", "Inquiries", "Information"],
+    rating: 4.4,
     users: 580,
-    price: "$59/month",
-    industry: "Sales",
+    price: "Free",
+    industry: "Business",
     voiceProvider: "Retell.ai",
-    category: "Lead Generation"
-  },
-  {
-    id: 8,
-    name: "Dr. Amy - Health Assistant",
-    description: "Provides health information and appointment scheduling for medical practices",
-    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
-    tags: ["Healthcare", "Vogent.ai", "HIPAA", "Scheduling"],
-    rating: 4.8,
-    users: 340,
-    price: "$89/month",
-    industry: "Healthcare",
-    voiceProvider: "Vogent.ai",
-    category: "Healthcare"
+    category: "Business Assistant",
+    voice_id: "11labs-Chloe"
   }
 ];
 
-const industries = ["All Industries", "Real Estate", "Customer Support", "Sales", "Finance", "Human Resources", "Education", "Healthcare"];
+const industries = ["All Industries", "Customer Support", "Sales", "Human Resources", "General", "Business", "Advanced"];
 const voiceProviders = ["All Providers", "Retell.ai", "Vogent.ai"];
 const pricing = ["All Pricing", "Free", "Paid"];
 
@@ -226,14 +221,14 @@ export function MarketplacePage() {
         if (a.price !== "Free" && b.price === "Free") return 1;
         return 0;
       case 'newest':
-        return b.id - a.id;
+        return String(b.id).localeCompare(String(a.id));
       case 'popularity':
       default:
         return b.users - a.users;
     }
   });
 
-  const toggleFavorite = (agentId: number) => {
+  const toggleFavorite = (agentId: string | number) => {
     actions.toggleFavorite(agentId);
     const agent = agents.find(a => a.id === agentId);
     if (agent) {
@@ -263,7 +258,7 @@ export function MarketplacePage() {
     }
   };
 
-  const isFavorite = (agentId: number) => {
+  const isFavorite = (agentId: string | number) => {
     return state.favoriteAgents.includes(agentId);
   };
 

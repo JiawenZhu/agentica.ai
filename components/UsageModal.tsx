@@ -33,7 +33,7 @@ interface UsageModalProps {
   isOpen: boolean;
   onClose: () => void;
   agentName: string;
-  agentId: number;
+  agentId: string | number;
 }
 
 // Mock function to simulate real-time usage data
